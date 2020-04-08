@@ -95,14 +95,14 @@ def main(camera_in=0, camera_out=1, do_flip=False):
         if not ret:
             break
 
-        if do_flip:
-            frame = cv2.flip(frame, 1)
-
         # apply filter before converting to out camera format
         if current_filter:
             frame = current_filter.draw(frame)
             if current_filter.done():
                 current_filter = None
+
+        if do_flip:
+            frame = cv2.flip(frame, 1)
 
         xframe = cv2.cvtColor(frame, cv2.COLOR_RGBA2YUV_YV12)
         raw = numpy.fromstring(xframe, dtype=numpy.uint8)

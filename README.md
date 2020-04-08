@@ -17,7 +17,7 @@ Current set of filters available through keyboard keys:
 ##  Requirements
 
 ```shell
-sudo apt install v4l2loopback-dkms python3-opencv
+sudo apt install v4l2loopback-dkms python3-opencv python3-construct
 ```
 
 

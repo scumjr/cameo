@@ -50,9 +50,7 @@ def open_capture(camera_in):
 
     return capture
 
-def open_video_out(camera_out):
-    width = 640
-    height = 480
+def open_video_out(camera_out, width, height):
     pix_format = dict(
         width        = width,
         height       = height,
@@ -77,7 +75,7 @@ def open_video_out(camera_out):
 
     return video_out
 
-def main(camera_in=0, camera_out=1, do_flip=False):
+def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
     current_filter = None
     keys = {
         " ": (FilterColor,    [ (255, 0, 211) ]),
@@ -89,7 +87,18 @@ def main(camera_in=0, camera_out=1, do_flip=False):
     }
 
     capture = open_capture(camera_in)
-    video_out = open_video_out(camera_out)
+
+    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    video_out = open_video_out(camera_out, width, height)
+
+    window_title = "Preview"
+    cv2.namedWindow(window_title, cv2.WINDOW_NORMAL)
+    if not thumbnail:
+        cv2.resizeWindow(window_title, width, height)
+    else:
+        cv2.resizeWindow(window_title, width // 2, height // 2)
+
     while True :
         ret, frame = capture.read()
         if not ret:
@@ -116,7 +125,7 @@ def main(camera_in=0, camera_out=1, do_flip=False):
 
         ret = video_out.write(raw)
 
-        cv2.imshow("Augmented reality - Webcam", frame)
+        cv2.imshow(window_title, frame)
         c = chr(cv2.waitKey(1) & 0xFF)
         if c == 'q':
             break
@@ -137,8 +146,9 @@ if __name__ == "__main__":
     parser.add_argument("--input", type=int, help="Video input", default=0)
     parser.add_argument("--output", type=int, help="Video output", default=1)
     parser.add_argument("--flip", action="store_true", help="Flip image horizontally")
+    parser.add_argument("--thumbnail", action="store_true", help="Reduce the window size")
 
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
-    main(args.input, args.output, args.flip)
+    main(args.input, args.output, args.flip, args.thumbnail)

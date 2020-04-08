@@ -33,8 +33,8 @@ class FilterColor(Filter):
 
     @staticmethod
     def add_color(frame, color):
-        width, height, channels = frame.shape
-        blank_image = numpy.zeros((width, height, channels), numpy.uint8)
+        height, width, channels = frame.shape
+        blank_image = numpy.zeros((height, width, channels), numpy.uint8)
         blank_image[:,:] = color
         frame = cv2.addWeighted(frame, 0.7, blank_image, 0.3, 0)
         return frame
@@ -54,7 +54,7 @@ class FilterAddImage(Filter):
             return
 
         self.img = cv2.resize(img, (150, 150))
-        self.width2, self.height2, _ = self.img.shape
+        self.height2, self.width2, _ = self.img.shape
 
     def draw(self, frame):
         if self.do_stop:
@@ -68,12 +68,12 @@ class FilterAddImage(Filter):
         b_channel, g_channel, r_channel = cv2.split(frame)
         alpha_channel = numpy.ones(b_channel.shape, dtype=b_channel.dtype) * 50
         frame = cv2.merge((b_channel, g_channel, r_channel, alpha_channel))
-        width, height, channels = frame.shape
+        height, width, channels = frame.shape
 
         # resize to the frame size and center the image
-        blank = numpy.zeros((width, height, channels), numpy.uint8)
+        blank = numpy.zeros((height, width, channels), numpy.uint8)
         x, y = (width - self.width2) // 2, (height - self.height2) // 2
-        blank[x:x+self.width2, y:y+self.height2] += self.img
+        blank[y:y+self.height2, x:x+self.width2] += self.img
 
         # create a mask from the given image
         img2gray = cv2.cvtColor(blank, cv2.COLOR_BGR2GRAY)

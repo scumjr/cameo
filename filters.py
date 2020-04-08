@@ -186,9 +186,3 @@ class FilterBlur(Filter):
             frame = face_frame
             self.last_frame = frame
         return frame
-
-    def stop(self):
-        self.do_stop = True
-
-    def done(self):
-        return self.do_stop

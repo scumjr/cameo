@@ -137,7 +137,7 @@ class FilterBlur(Filter):
 
         # https://stackoverflow.com/a/55509210
         pixelized = frame.copy()
-        pixelized = cv2.resize(pixelized, (width // 12, width // 12), interpolation=cv2.INTER_LINEAR)
+        pixelized = cv2.resize(pixelized, (width // 12, height // 12), interpolation=cv2.INTER_LINEAR)
         pixelized = cv2.resize(pixelized, (width, height), interpolation=cv2.INTER_NEAREST)
 
         blank = numpy.zeros((height, width, channels), numpy.uint8)

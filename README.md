@@ -25,7 +25,7 @@ sudo apt install v4l2loopback-dkms python3-opencv
 
 ```shell
 sudo modprobe v4l2loopback exclusive_caps=1
-./camera.py
+./cameo.py
 ```
 
 

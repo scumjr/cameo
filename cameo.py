@@ -110,9 +110,6 @@ def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
             if current_filter.done():
                 current_filter = None
 
-        if do_flip:
-            frame = cv2.flip(frame, 1)
-
         xframe = cv2.cvtColor(frame, cv2.COLOR_RGBA2YUV_YV12)
         raw = numpy.fromstring(xframe, dtype=numpy.uint8)
 
@@ -125,7 +122,12 @@ def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
 
         ret = video_out.write(raw)
 
-        cv2.imshow(window_title, frame)
+        if do_flip:
+            displayed_frame = cv2.flip(frame, 1)
+        else:
+            displayed_frame = frame
+
+        cv2.imshow(window_title, displayed_frame)
         c = chr(cv2.waitKey(1) & 0xFF)
         if c == 'q':
             break

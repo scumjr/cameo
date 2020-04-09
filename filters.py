@@ -103,7 +103,9 @@ class FilterAddText(Filter):
         textsize = cv2.getTextSize(self.text, font, 1, 2)[0]
         x = (frame.shape[1] - textsize[0]) // 2
         y = (frame.shape[0] + textsize[1]) // 2 - 10
+        frame = cv2.flip(frame, 1)
         frame = cv2.putText(frame, self.text, (x, y), font, fontScale, color, thickness, cv2.LINE_AA)
+        frame = cv2.flip(frame, 1)
         return frame
 
 class FilterVideo(Filter):

@@ -69,9 +69,9 @@ def open_video_out(camera_out, width, height):
 
     request = v4l2_format.build(vid_format)
     ret = fcntl.ioctl(video_out.fileno(), VIDIOC_S_FMT, request)
-    if ret != request:
-        logging.warning("unexpected ioctl output (happens with different sizeimage...)")
-        logging.warning(v4l2_format.parse(ret))
+    #if ret != request:
+    #    logging.warning("unexpected ioctl output (happens with different sizeimage...)")
+    #    logging.warning(v4l2_format.parse(ret))
 
     return video_out
 
@@ -112,15 +112,7 @@ def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
 
         xframe = cv2.cvtColor(frame, cv2.COLOR_RGBA2YUV_YV12)
         raw = numpy.fromstring(xframe, dtype=numpy.uint8)
-
-        if False:
-            print(len(raw), raw)
-            with open('/tmp/w', 'wb') as fp:
-                fp.write(raw)
-        if False:
-            cv2.imwrite("/tmp/frame.jpg", frame)
-
-        ret = video_out.write(raw)
+        _ = video_out.write(raw)
 
         if do_flip:
             displayed_frame = cv2.flip(frame, 1)
@@ -151,5 +143,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d:%(name)s: %(message)s', datefmt='%H:%M:%S')
     main(args.input, args.output, args.flip, args.thumbnail)

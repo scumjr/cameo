@@ -5,12 +5,20 @@ import cv2
 import logging
 import numpy
 
-class Filter:
+class MetaClass(type):
+    """This meta class adds a logger property to class methods."""
+
+    @property
+    def logger(self):
+        return logging.getLogger(self.__name__)
+
+class Filter(metaclass=MetaClass):
     def __init__(self, duration=1.0):
         self.start_time = datetime.datetime.now()
         self.duration = duration
         self.do_stop = False
-        logging.debug("applying filter")
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.info("start")
 
     def stop(self):
         self.do_stop = True
@@ -19,7 +27,7 @@ class Filter:
         diff = datetime.datetime.now() - self.start_time
         done = (self.duration > 0 and diff.total_seconds() >= self.duration) or self.do_stop
         if done:
-            logging.debug("filter applied")
+            self.logger.info("stop")
         return done
 
     @abstractmethod
@@ -40,7 +48,6 @@ class FilterColor(Filter):
         return frame
 
     def draw(self, frame):
-        logging.debug("color filter")
         frame = FilterColor.add_color(frame, self.color)
         return frame
 
@@ -49,7 +56,7 @@ class FilterAddImage(Filter):
         super(FilterAddImage, self).__init__(duration=2)
         img = cv2.imread(path, cv2.IMREAD_UNCHANGED)
         if img is None:
-            logging.error(f"image file '{path}' doesn't exist")
+            self.logger.error(f"image file '{path}' doesn't exist")
             self.do_stop = True
             return
 
@@ -59,8 +66,6 @@ class FilterAddImage(Filter):
     def draw(self, frame):
         if self.do_stop:
             return frame
-
-        logging.debug("image filter")
 
         frame = FilterColor.add_color(frame, (255, 178, 0))
 
@@ -113,7 +118,7 @@ class FilterVideo(Filter):
         super(FilterVideo, self).__init__(duration=0)
         self.video = cv2.VideoCapture(path)
         if not self.video.isOpened():
-            logging.error(f"video file '{path}' doesn't exist")
+            self.logger.error(f"video file '{path}' doesn't exist")
             self.do_stop = True
 
     def draw(self, frame):
@@ -218,14 +223,14 @@ class FilterBlur(Filter):
 
         return faces
 
-    @staticmethod
-    def detect_faces(frame, cascade):
+    @classmethod
+    def detect_faces(cls, frame, cascade):
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         faces = cascade.detectMultiScale(gray_frame, 1.3, 5)
         if len(faces) == 0:
+            cls.logger.debug("no face detected")
             height, width, _ = frame.shape
             faces = [ (0, 0, width, height) ]
-            logging.debug("no face detected")
         return faces
 
     @staticmethod

@@ -83,7 +83,7 @@ def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
         "a": (FilterAddImage, [ "img/applause.png" ]),
         "t": (FilterAddText,  [ "(be right back)" ]),
         "v": (FilterVideo,    [ "img/rick-astley-never-gonna-give-you-up-video.mp4" ]),
-        "b": (FilterBlur ,    [ "{LASTFRAME}" ]),
+        "b": (FilterBlur ,    []),
     }
 
     capture = open_capture(camera_in)
@@ -134,7 +134,6 @@ def main(camera_in=0, camera_out=1, do_flip=False, thumbnail=False):
         elif c in keys:
             klass, args = keys[c]
             if current_filter is None:
-                args = [ frame if arg == "{LASTFRAME}" else arg for arg in args ]
                 current_filter = klass(*args)
             elif isinstance(current_filter, klass):
                 current_filter.stop()

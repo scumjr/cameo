@@ -132,10 +132,9 @@ class FilterBlur(Filter):
 
     face_cascade = cv2.CascadeClassifier('img/haarcascade_frontalface_default.xml')
 
-    def __init__(self, frame):
+    def __init__(self):
         super(FilterBlur, self).__init__(duration=0)
         self.do_stop = False
-        self.last_frame = frame
         self.debug = False
 
     @staticmethod
@@ -222,11 +221,20 @@ class FilterBlur(Filter):
     @staticmethod
     def detect_faces(frame, cascade):
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return cascade.detectMultiScale(gray_frame, 1.3, 5)
+        faces = cascade.detectMultiScale(gray_frame, 1.3, 5)
+        if len(faces) == 0:
+            height, width, _ = frame.shape
+            faces = [ (0, 0, width, height) ]
+            logging.debug("no face detected")
+        return faces
 
     @staticmethod
-    def increase_face_area(faces, margin=80):
-        return [ (x - margin // 2, y - margin // 2, w + margin, h + margin) for x, y, w, h in faces ]
+    def increase_face_area(faces, width, height, margin=80):
+        return [ (max(0, x - margin // 2),
+                  max(0, y - margin // 2),
+                  min(w + margin, width),
+                  min(h + margin, height))
+                 for x, y, w, h in faces ]
 
     @staticmethod
     def mark_faces(frame, faces, rgb=(255, 255, 0)):
@@ -237,17 +245,12 @@ class FilterBlur(Filter):
 
     def draw(self, frame):
         faces = FilterBlur.detect_faces(frame, FilterBlur.face_cascade)
-        # setting this condition to True prevent an image with no face blurred
-        # from being returned
-        if len(faces) == 0 and True:
-            frame = self.last_frame
-        else:
-            _, width, _ = frame.shape
-            faces = FilterBlur.increase_face_area(faces)
-            faces = FilterBlur.merge_faces(faces, width, frame)
-            frame = FilterBlur.pixelize(frame, faces)
-            if self.debug:
-                FilterBlur.mark_faces(frame, faces)
-            self.last_frame = frame
+        height, width, _ = frame.shape
+        faces = FilterBlur.increase_face_area(faces, width, height)
+        faces = FilterBlur.merge_faces(faces, width, frame)
+        frame = FilterBlur.pixelize(frame, faces)
+        if self.debug:
+            FilterBlur.mark_faces(frame, faces)
+        self.last_frame = frame
 
         return frame
